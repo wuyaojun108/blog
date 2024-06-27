@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.wyj.blog.mapper.ArticleMapper">
+
+    <!-- 定义结果映射 -->
+    <resultMap id="resultMap" type="org.wyj.blog.entity.dos.Article">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="summary" property="summary" jdbcType="VARCHAR"/>
+        <result column="comment_counts" property="commentCounts" jdbcType="INTEGER"/>
+        <result column="view_counts" property="viewCounts" jdbcType="INTEGER"/>
+        <result column="author_id" property="authorId" jdbcType="BIGINT"/>
+        <result column="body_id" property="bodyId" jdbcType="BIGINT"/>
+        <result column="category_id" property="categoryId" jdbcType="INTEGER"/>
+        <result column="weight" property="weight" jdbcType="INTEGER"/>
+        <result column="create_date" property="createDate" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="baseColumnList">
+        id, title, summary, comment_counts, view_counts, author_id, body_id,
+        category_id, weight, create_date
+    </sql>
+
+    <select id="listArchives" resultType="org.wyj.blog.entity.dto.ArticleArchiveDTO">
+        SELECT year(date_time) year, month(date_time) month, count(1) count
+        FROM (
+            SELECT from_unixtime(create_date / 1000) date_time
+            FROM ms_article
+            WHERE create_date IS NOT NULL
+        ) t1
+        GROUP BY year, month;
+    </select>
+
+    <select id="getArticleListByAuthorIdAndTagId" resultMap="resultMap">
+        SELECT <include refid="baseColumnList" />
+        FROM ms_article
+        WHERE author_id = #{authorId, jdbcType=INTEGER}
+            AND id IN (
+                SELECT article_id
+                FROM ms_article_tag
+                WHERE tag_id = #{tagId, jdbcType=INTEGER}
+            )
+        LIMIT #{offset, jdbcType=INTEGER}, #{pageSize, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectCountByAuthorIdAndTagId" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM (
+            SELECT <include refid="baseColumnList" />
+            FROM ms_article
+            WHERE author_id = #{authorId, jdbcType=INTEGER}
+                AND id IN (
+                    SELECT article_id
+                    FROM ms_article_tag
+                    WHERE tag_id = #{tagId, jdbcType=INTEGER}
+                )
+        ) t1
+
+    </select>
+
+</mapper>
