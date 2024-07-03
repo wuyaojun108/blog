@@ -208,5 +208,5 @@ public class WebMVCConfig implements WebMvcConfigurer {
 
 当前程序中涉及到的所有组件，redis、rocketMQ、springboot程序、mysql，都是单机部署。
 
-所有的测试脚本都在当前目录下
+所有的测试脚本都在当前目录下，性能测试的结果，所有的接口平均下来，吞吐量在每秒20左右
 
